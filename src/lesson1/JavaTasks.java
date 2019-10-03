@@ -51,6 +51,7 @@ public class JavaTasks {
             String s = bufferedReader.readLine();
             while (s != null) {
                 list.add(new Pair<>(timeToInt(s), s));
+                s = bufferedReader.readLine();
             }
             bufferedReader.close();
             list.sort(JavaTasks::compare);
