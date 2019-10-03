@@ -57,7 +57,7 @@ public class JavaTasks {
             list.sort(JavaTasks::compare);
             bufferedWriter = new BufferedWriter(new FileWriter(outputName));
             for (int i = 0; i < list.size(); i++) {
-                bufferedWriter.write(list.get(i).getSecond());
+                bufferedWriter.write(list.get(i).getSecond() + "\n");
             }
             bufferedWriter.close();
         } catch (IOException e) {
