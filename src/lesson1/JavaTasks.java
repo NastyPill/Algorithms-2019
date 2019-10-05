@@ -4,10 +4,7 @@ import kotlin.NotImplementedError;
 import kotlin.Pair;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
@@ -47,13 +44,21 @@ public class JavaTasks {
     final int HALF_DAY_IN_SECONDS = 12 * 60 * 60;
 
     static public void sortTimes(String inputName, String outputName) {
-        ArrayList<String> listOfString = read(inputName);
-        ArrayList<Pair<Integer, String>> list = new ArrayList<>();
+        List<String> listOfString = read(inputName);
+        List<Pair<Integer, String>> list = new ArrayList<>();
         for (String s : listOfString) {
-            list.add(new Pair<>(timeToInt(s), s.split(" ")[1]));
+            list.add(new Pair<>(timeToInt(s), s));
         }
         list.sort(JavaTasks::compare);
-        write((String[]) list.toArray(), outputName);
+        write( listOfSecond(list).toArray(), outputName);
+    }
+
+    static private List<String> listOfSecond(List<Pair<Integer, String>> list) {
+        List<String> res = new ArrayList<>();
+        for (Pair<Integer, String> p : list) {
+            res.add(p.getSecond());
+        }
+        return res;
     }
 
 
@@ -87,8 +92,8 @@ public class JavaTasks {
         }
     }
 
-    static private ArrayList<String> read(String in) {
-        ArrayList<String> list = new ArrayList<>();
+    static private List<String> read(String in) {
+        List<String> list = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(in))) {
             String s = reader.readLine();
             while (s != null) {
@@ -96,18 +101,18 @@ public class JavaTasks {
                 s = reader.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException(e.getMessage());
         }
         return list;
     }
 
-    static private void write(String[] text, String out) {
+    static private void write(Object[] text, String out) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(out))) {
             for (int i = 0; i < text.length; i++) {
                 writer.write(text[i] + "\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException();
         }
     }
 
@@ -139,11 +144,10 @@ public class JavaTasks {
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
     static public void sortAddresses(String inputName, String outputName) {
-        HashMap<String, ArrayList<String>> mapOfAdresses = splitting(read(inputName));
-        ArrayList<String> result = new ArrayList<>();
+        Map<String, List<String>> mapOfAdresses = splitting(read(inputName));
+        List<String> result = new ArrayList<>();
         for (String key : mapOfAdresses.keySet()) {
-            ArrayList<String> list = mapOfAdresses.get(key);
-            list.sort(String::compareTo);
+            List<String> list = mapOfAdresses.get(key);
             StringBuilder sb = new StringBuilder(key);
             sb.append(" - ");
             sb.append(list.get(0));
@@ -153,16 +157,32 @@ public class JavaTasks {
             }
             result.add(sb.toString());
         }
-        write((String[]) result.toArray(), outputName);
+        result.sort(JavaTasks::compare);
+        write(result.toArray(), outputName);
     }
 
-    static private HashMap<String, ArrayList<String>> splitting(ArrayList<String> list) {
-        list.sort(String::compareTo);
-        HashMap<String, ArrayList<String>> result = new HashMap<>();
+    static private int compare(String s1, String s2) {
+        String[] adr1 = s1.split(" - ")[0].trim().split(" ");
+        String[] adr2 = s2.split(" - ")[0].trim().split(" ");
+        if(adr1[0].equals(adr2[0])) {
+            return (Integer.parseInt(adr1[1]) > Integer.parseInt(adr2[1])) ? 1 : -1;
+        } else {
+            return adr1[0].compareTo(adr2[0]);
+        }
+    }
+
+    static private Map<String, List<String>> splitting(List<String> list) {
         for (String s : list) {
-            String[] currentString = s.split("-");
-            String adr = currentString[0].trim();
-            String name = currentString[1].trim();
+            if (!s.matches("([A-Za-zа-яёА-ЯЁ]+ ){2}- (([а-яёА-ЯЁ]+)(-[А-Я][а-яё]+)?) \\d+")) {
+                throw new IllegalArgumentException(s + " doesn't match");
+            }
+        }
+        list.sort(String::compareTo);
+        Map<String, List<String>> result = new HashMap<>();
+        for (String s : list) {
+            String[] currentString = s.split(" - ");
+            String adr = currentString[1].trim();
+            String name = currentString[0].trim();
             if(result.get(adr) != null) {
                 result.get(adr).add(name);
             } else {

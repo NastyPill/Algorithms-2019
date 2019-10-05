@@ -16,4 +16,8 @@ abstract class AbstractFileTests {
             assertEquals(expectedLine, line)
         }
     }
+
+    protected fun assertFilesContent(name1: String, name2: String) {
+        assertEquals(File(name1).readLines(), File(name2).readLines())
+    }
 }
