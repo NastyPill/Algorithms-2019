@@ -4,8 +4,11 @@ import kotlin.NotImplementedError;
 import kotlin.Pair;
 
 import java.io.*;
-import java.nio.Buffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class JavaTasks {
@@ -44,26 +47,15 @@ public class JavaTasks {
     final int HALF_DAY_IN_SECONDS = 12 * 60 * 60;
 
     static public void sortTimes(String inputName, String outputName) {
-
+        ArrayList<String> listOfString = read(inputName);
         ArrayList<Pair<Integer, String>> list = new ArrayList<>();
-        try {
-            bufferedReader = new BufferedReader(new FileReader(inputName));
-            String s = bufferedReader.readLine();
-            while (s != null) {
-                list.add(new Pair<>(timeToInt(s), s));
-                s = bufferedReader.readLine();
-            }
-            bufferedReader.close();
-            list.sort(JavaTasks::compare);
-            bufferedWriter = new BufferedWriter(new FileWriter(outputName));
-            for (int i = 0; i < list.size(); i++) {
-                bufferedWriter.write(list.get(i).getSecond() + "\n");
-            }
-            bufferedWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (String s : listOfString) {
+            list.add(new Pair<>(timeToInt(s), s.split(" ")[1]));
         }
+        list.sort(JavaTasks::compare);
+        write((String[]) list.toArray(), outputName);
     }
+
 
     static private int compare(Pair<Integer, String> p1, Pair<Integer, String> p2) {
         return p1.getFirst().compareTo(p2.getFirst());
@@ -95,6 +87,31 @@ public class JavaTasks {
         }
     }
 
+    static private ArrayList<String> read(String in) {
+        ArrayList<String> list = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(in))) {
+            String s = reader.readLine();
+            while (s != null) {
+                list.add(s);
+                s = reader.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    static private void write(String[] text, String out) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(out))) {
+            for (int i = 0; i < text.length; i++) {
+                writer.write(text[i] + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     /**
      * Сортировка адресов
      * <p>
@@ -122,8 +139,41 @@ public class JavaTasks {
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
     static public void sortAddresses(String inputName, String outputName) {
-        throw new NotImplementedError();
+        HashMap<String, ArrayList<String>> mapOfAdresses = splitting(read(inputName));
+        ArrayList<String> result = new ArrayList<>();
+        for (String key : mapOfAdresses.keySet()) {
+            ArrayList<String> list = mapOfAdresses.get(key);
+            list.sort(String::compareTo);
+            StringBuilder sb = new StringBuilder(key);
+            sb.append(" - ");
+            sb.append(list.get(0));
+            for (int i = 1; i < list.size(); i++) {
+                sb.append(", ");
+                sb.append(list.get(i));
+            }
+            result.add(sb.toString());
+        }
+        write((String[]) result.toArray(), outputName);
     }
+
+    static private HashMap<String, ArrayList<String>> splitting(ArrayList<String> list) {
+        list.sort(String::compareTo);
+        HashMap<String, ArrayList<String>> result = new HashMap<>();
+        for (String s : list) {
+            String[] currentString = s.split("-");
+            String adr = currentString[0].trim();
+            String name = currentString[1].trim();
+            if(result.get(adr) != null) {
+                result.get(adr).add(name);
+            } else {
+                result.put(adr, new ArrayList<>());
+                result.get(adr).add(name);
+            }
+        }
+        return result;
+    }
+
+
 
     /**
      * Сортировка температур
