@@ -2,14 +2,24 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 import kotlin.Pair;
+import sun.nio.cs.UTF_8;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class JavaTasks {
     /**
+     * ====================================
+     * Сложность в среднем случае O(nLog(n))
+     * Сложность в худшем(sort работает, как qsort и на вход подается
+     * такой массив, который заставляет работать qsort за n^2) O(n^2)
+     * <p>
+     * Память O(n)
+     * <p>
+     * ====================================
      * Сортировка времён
      * <p>
      * Простая
@@ -50,7 +60,7 @@ public class JavaTasks {
             list.add(new Pair<>(timeToInt(s), s));
         }
         list.sort(JavaTasks::compare);
-        write( listOfSecond(list).toArray(), outputName);
+        write(listOfSecond(list).toArray(), outputName);
     }
 
     static private List<String> listOfSecond(List<Pair<Integer, String>> list) {
@@ -92,9 +102,9 @@ public class JavaTasks {
         }
     }
 
-    static private List<String> read(String in) {
+    static public List<String> read(String in) {
         List<String> list = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(in))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(in), StandardCharsets.UTF_8))) {
             String s = reader.readLine();
             while (s != null) {
                 list.add(s);
@@ -106,18 +116,25 @@ public class JavaTasks {
         return list;
     }
 
-    static private void write(Object[] text, String out) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(out))) {
+    static public void write(Object[] text, String out) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), StandardCharsets.UTF_8))) {
             for (int i = 0; i < text.length; i++) {
                 writer.write(text[i] + "\n");
             }
         } catch (IOException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(e.getMessage());
         }
     }
 
 
     /**
+     * =================================
+     * Сложность в среднем случае O(nLog(n))
+     * Сложность в худшем(sort работает, как qsort и на вход подается
+     * такой массив, который заставляет работать qsort за n^2) O(n^2)
+     * <p>
+     * Память O(n)
+     * =================================
      * Сортировка адресов
      * <p>
      * Средняя
@@ -164,7 +181,7 @@ public class JavaTasks {
     static private int compare(String s1, String s2) {
         String[] adr1 = s1.split(" - ")[0].trim().split(" ");
         String[] adr2 = s2.split(" - ")[0].trim().split(" ");
-        if(adr1[0].equals(adr2[0])) {
+        if (adr1[0].equals(adr2[0])) {
             return (Integer.parseInt(adr1[1]) > Integer.parseInt(adr2[1])) ? 1 : -1;
         } else {
             return adr1[0].compareTo(adr2[0]);
@@ -173,7 +190,7 @@ public class JavaTasks {
 
     static private Map<String, List<String>> splitting(List<String> list) {
         for (String s : list) {
-            if (!s.matches("([A-Za-zа-яёА-ЯЁ]+ ){2}- (([а-яёА-ЯЁ]+)(-[А-Я][а-яё]+)?) \\d+")) {
+            if (!s.matches("([A-Za-zsdа-яёА-ЯЁ]+ ){2}- (([а-яёА-ЯЁ]+)(-[А-Я][а-яё]+)?) \\d+")) {
                 throw new IllegalArgumentException(s + " doesn't match");
             }
         }
@@ -183,7 +200,7 @@ public class JavaTasks {
             String[] currentString = s.split(" - ");
             String adr = currentString[1].trim();
             String name = currentString[0].trim();
-            if(result.get(adr) != null) {
+            if (result.get(adr) != null) {
                 result.get(adr).add(name);
             } else {
                 result.put(adr, new ArrayList<>());
@@ -194,8 +211,10 @@ public class JavaTasks {
     }
 
 
-
-    /**
+    /**==================
+     * Сложность O(n)
+     * Память O(n)
+     * ==================
      * Сортировка температур
      * <p>
      * Средняя
@@ -226,7 +245,29 @@ public class JavaTasks {
      * 121.3
      */
     static public void sortTemperatures(String inputName, String outputName) {
-        throw new NotImplementedError();
+        int[] array = new int[7732];
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputName), StandardCharsets.UTF_8))) {
+            String s = reader.readLine();
+            while (s != null) {
+                if(!s.matches("-?\\d{1,3}(\\.\\d)?")){
+                    throw new IllegalArgumentException();
+                }
+                array[(int) ((Double.parseDouble(s) + 273) * 10)]++;
+                s = reader.readLine();
+            }
+        } catch (IOException ex) {
+            throw new IllegalArgumentException(ex.getMessage());
+        }
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputName), StandardCharsets.UTF_8))) {
+            for (int i = 0; i < array.length; i++) {
+                while (array[i] > 0) {
+                    array[i]--;
+                    writer.write( (double) (i - 2730) / 10 + "\n");
+                }
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     /**
@@ -263,6 +304,10 @@ public class JavaTasks {
     }
 
     /**
+     * ==============================
+     * сложность О(n)
+     * доп память не требуется, т.е. Память O(n)
+     * ==============================
      * Соединить два отсортированных массива в один
      * <p>
      * Простая
@@ -277,6 +322,25 @@ public class JavaTasks {
      * Результат: second = [1 3 4 9 9 13 15 20 23 28]
      */
     static <T extends Comparable<T>> void mergeArrays(T[] first, T[] second) {
-        throw new NotImplementedError();
+        int posInSecond = 0;
+        int posInFirst = 0;
+        for (int i = 0; i < second.length; i++) {
+            if (second[i] != null) {
+                posInSecond = i;
+                break;
+            }
+        }
+        int currentPosInResult = 0;
+        while (posInFirst < first.length || posInSecond < second.length) {
+            if (first[posInFirst].compareTo(second[posInSecond]) < 0) {
+                second[currentPosInResult] = first[posInFirst];
+                posInFirst++;
+                currentPosInResult++;
+            } else {
+                second[currentPosInResult] = second[posInSecond];
+                posInSecond++;
+                currentPosInResult++;
+            }
+        }
     }
 }
