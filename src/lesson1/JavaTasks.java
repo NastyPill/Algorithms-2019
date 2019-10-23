@@ -2,12 +2,10 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 import kotlin.Pair;
-import sun.nio.cs.UTF_8;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class JavaTasks {
