@@ -4,9 +4,7 @@ import kotlin.NotImplementedError;
 import org.graalvm.compiler.printer.CFGPrinterObserver;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JavaDynamicTasks {
@@ -61,6 +59,8 @@ public class JavaDynamicTasks {
 
 
     /**
+     * Сложность O(n^2)
+     * Доп. Память O(n)
      * Наибольшая возрастающая подпоследовательность
      * Сложная
      * <p>
@@ -73,10 +73,42 @@ public class JavaDynamicTasks {
      * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
      */
     public static List<Integer> longestIncreasingSubSequence(List<Integer> list) {
-        throw new NotImplementedError();
+        int size = list.size();                     //размер исходной последовательности
+        int idxs[] = new int[size];
+        int d[] = new int[size];
+        if (list.isEmpty()) {
+            return list;
+        }
+        for (int i = 0; i < size; i++) {
+            d[i] = 1;
+            idxs[i] = -1;
+            for (int j = 0; j < i; j++) {
+                if (list.get(j) < list.get(i) && d[j] + 1 > d[i]) {
+                    d[i] = d[j] + 1;
+                    idxs[i] = j;
+                }
+            }
+        }
+        int last = 0;
+        int len = d[0];
+        for (int i = 0; i < size; i++) {
+            if (d[i] > len) {
+                last = i;
+                len = d[i];
+            }
+        }
+        List<Integer> res = new LinkedList<>();
+        while (last != -1) {
+            res.add(list.get(last));
+            last = idxs[last];
+        }
+        Collections.reverse(res);
+        return res;
     }
 
     /**
+     * Сложность    : o(n^2)
+     * Доп. память  : O(n^2)
      * Самый короткий маршрут на прямоугольном поле.
      * Средняя
      * <p>
@@ -130,14 +162,6 @@ public class JavaDynamicTasks {
                 floor[i][j] += Math.min(min, floor[i - 1][j - 1]);
             }
         }
-        for (int i = 0; i < h; i++) {
-            for (int j = 0; j < w; j++) {
-                System.out.print(floor[i][j] + " ");
-            }
-            System.out.println();
-        }
-
-        System.out.println(inputName);
         return floor[h - 1][w - 1];
     }
 
